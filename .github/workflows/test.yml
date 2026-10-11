@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths: ["test.txt"]
   workflow_dispatch: {}
-permissions: { contents: read }
+permissions: { contents: write }
 env: { MODEL_URL: "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip" }
 jobs:
   desktop-linux:
@@ -63,3 +63,15 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: android-test, path: shots }
+  results:
+    needs: [desktop-linux, android-emulator]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: results }
+      - name: Save results to the test-results branch
+        run: |
+          cd results && git init -q -b test-results && git add -A
+          git -c user.name=bob-tests -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -qm "Test results ${{ github.run_id }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" test-results
