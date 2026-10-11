@@ -1,0 +1,123 @@
+# Bob's code is private (AbhiramUpadrashta/Bob-src). This public repo builds the apps and publishes them.
+# SRC_KEY is a read-only deploy key for the private code.
+name: Build & Release Bob
+on:
+  push:
+    branches: [main]
+    paths: ["release.txt"]
+  workflow_dispatch:
+    inputs:
+      force: { description: "Rebuild even if this version is already published", type: boolean, default: false }
+permissions: { contents: write }
+concurrency: { group: release, cancel-in-progress: false }
+env: { MODEL_URL: "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip" }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs: { version: "${{ steps.v.outputs.version }}" }
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: AbhiramUpadrashta/Bob-src, ssh-key: "${{ secrets.SRC_KEY }}" }
+      - id: v
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+  web:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: AbhiramUpadrashta/Bob-src, ssh-key: "${{ secrets.SRC_KEY }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-audit --no-fund && ./build.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: web, path: dist/web, include-hidden-files: true }
+      - name: Speech model (offline "Hey Bob")
+        run: curl -fL --retry 4 -o model.zip "$MODEL_URL" && unzip -q model.zip -d model && ls model
+      - uses: actions/upload-artifact@v4
+        with: { name: model, path: model.zip }
+  android:
+    needs: [check, web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: AbhiramUpadrashta/Bob-src, ssh-key: "${{ secrets.SRC_KEY }}" }
+      - uses: actions/download-artifact@v4
+        with: { name: web, path: android/app/src/main/assets/www }
+      - uses: actions/download-artifact@v4
+        with: { name: model, path: android/app/src/main/assets }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: "8.7" }
+      - name: Build APK
+        env: { BOB_VERSION: "${{ needs.check.outputs.version }}", BOB_VERSION_CODE: "${{ github.run_number }}" }
+        run: |
+          rm -rf android/app/src/main/assets/www/app/chunks/vosk-*.js
+          cd android && gradle --no-daemon :app:assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk ../Bob.apk && ls -la ../Bob.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: android, path: Bob.apk, if-no-files-found: error }
+  desktop:
+    needs: [check, web]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-latest, target: mac }
+          - { os: windows-latest, target: win }
+    runs-on: ${{ matrix.os }}
+    env: { CSC_IDENTITY_AUTO_DISCOVERY: "false" }
+    defaults: { run: { shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: AbhiramUpadrashta/Bob-src, ssh-key: "${{ secrets.SRC_KEY }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/download-artifact@v4
+        with: { name: web, path: desktop/app }
+      - uses: actions/download-artifact@v4
+        with: { name: model, path: . }
+      - name: Pack the speech model for the app
+        run: |
+          python -c "import zipfile,tarfile,os;zipfile.ZipFile('model.zip').extractall('m');d=[x for x in os.listdir('m')][0];os.makedirs('desktop/model',exist_ok=True);t=tarfile.open('desktop/model/model.tar.gz','w:gz');t.add(os.path.join('m',d),arcname=d);t.close()"
+          ls -la desktop/model
+      - name: Build
+        run: |
+          cd desktop && npm install --no-audit --no-fund
+          sed -i.bak "s/\"version\": \"1.0.0\"/\"version\": \"${{ needs.check.outputs.version }}\"/" package.json
+          if [ "${{ matrix.target }}" = mac ]; then
+            npm run dist:mac
+            APP="$(find dist -maxdepth 3 -name 'Bob.app' | head -1)"; echo "$APP"
+            codesign --force --deep --sign - "$APP"
+            ditto -c -k --sequesterRsrc --keepParent "$APP" ../Bob-mac.zip
+          else
+            npm run dist:win
+            cp dist/Bob-Setup.exe ../Bob-Setup.exe
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.target }}
+          path: |
+            Bob-mac.zip
+            Bob-Setup.exe
+          if-no-files-found: error
+  release:
+    needs: [check, android, desktop]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { pattern: "{android,desktop-*}", path: out, merge-multiple: true }
+      - name: Publish release
+        env: { GH_TOKEN: "${{ github.token }}", GH_REPO: "${{ github.repository }}" }
+        run: |
+          V=${{ needs.check.outputs.version }}; TAG="v$V"; ls -la out
+          FILES="out/Bob.apk out/Bob-mac.zip out/Bob-Setup.exe"
+          NOTES="Bob $V — say “Hey Bob”. A voice assistant with feelings, by Bubbles Aro.
+
+          **Android:** download Bob.apk → open it → allow installing from your browser → Install. Then allow the microphone (and “display over other apps” for the screen glow).
+          **Mac:** download Bob-mac.zip → open it → drag Bob to Applications → right-click Bob → Open (first time only).
+          **Windows:** download Bob-Setup.exe → run it (More info → Run anyway, first time only).
+
+          Website: https://abhiramupadrashta.github.io/Bob/ · MIT License"
+          if gh release view "$TAG" >/dev/null 2>&1; then gh release upload "$TAG" $FILES --clobber
+          else gh release create "$TAG" $FILES --title "Bob $V" --notes "$NOTES" --latest; fi
