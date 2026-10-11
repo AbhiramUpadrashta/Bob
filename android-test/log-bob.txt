@@ -1,0 +1,29 @@
+V/installd(  422): DexInv: --- END '/data/app/~~3oRjScKpPTeQPPYJKrIFcw==/com.bubblesaro.bob-9AU8y8uooqh810APvHsEkQ==/base.apk' (success) ---
+I/MediaProvider( 1502): Invalidating LocalCallingIdentity cache for package com.bubblesaro.bob. Reason: package android.intent.action.PACKAGE_ADDED
+I/GsaVoiceInteractionSrv( 1511): O received Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 (has extras) }
+D/AvrcpMediaPlayerList(  688): Name of package changed: com.bubblesaro.bob
+W/GCM     ( 1196): Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+W/GCM     ( 1196): Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+I/ChromeSync( 1452): [Sync,SyncIntentOperation] Handling the intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+I/FontsPackageChangeOp( 1452): Package com.bubblesaro.bob has no metadata
+I/ChromeSync( 1452): [Persistence,AffiliationManager] One of affiliation or grouping data for android://9lGRTiMBIQSqJRSEhsakj_6j3-u_Nsu2x-xlMucxLnm8_inecl1rs4AozmTg_5WHXwgkONhEdHnlrL52FWfpVg==@com.bubblesaro.bob/ was not found. Marking affiliation data as stale...
+I/ActivityTaskManager(  496): START u0 {flg=0x10000000 cmp=com.bubblesaro.bob/.MainActivity} from uid 2000
+I/ActivityManager(  496): Start proc 4026:com.bubblesaro.bob/u0a167 for pre-top-activity {com.bubblesaro.bob/com.bubblesaro.bob.MainActivity}
+I/ActivityManager(  496): Start proc 4073:com.google.android.webview:webview_service/u0a144 for service {com.google.android.webview/org.chromium.android_webview.services.VariationsSeedServer}
+E/chromium( 4026): [ERROR:filesystem_posix.cc(62)] mkdir /data/user/0/com.bubblesaro.bob/cache/WebView/Crashpad: No such file or directory (2)
+I/ActivityManager(  496): Start proc 4084:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0ai9000 for  {com.bubblesaro.bob/org.chromium.content.app.SandboxedProcessService0:0}
+I/TetheringManager( 4026): registerTetheringEventCallback:com.bubblesaro.bob
+W/chromium( 4026): [WARNING:dns_config_service_posix.cc(341)] Failed to read DnsConfig.
+D/ArtManagerInternalImpl(  496): /data/misc/iorapd/com.bubblesaro.bob/3/com.bubblesaro.bob.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+I/ActivityTaskManager(  496): Displayed com.bubblesaro.bob/.MainActivity: +591ms
+I/ActivityManager(  496): Start proc 4413:com.android.chrome/u0a131 for service {com.android.chrome/org.chromium.chrome.browser.customtabs.CustomTabsConnectionService}
+W/.android.chrom( 4413): Long monitor contention with owner CrAsyncTask #1 (4482) at boolean hj.g(java.lang.String)(chromium-TrichromeChromeGoogle.aab-stable-410410686:13) waiters=0 in boolean hj.g(java.lang.String) for 584ms
+I/iorapd  (  423): Perfetto TraceBuffer saved to file: /data/misc/iorapd/com.bubblesaro.bob/3/com.bubblesaro.bob.MainActivity/raw_traces/1791741281497136697.perfetto_trace.pb
+D/ProfileInstaller( 4026): Installing profile for com.bubblesaro.bob
+W/BroadcastQueue(  496): Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 (has extras) } to com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver
+W/BroadcastQueue(  496): Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+W/BroadcastQueue(  496): Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+W/BroadcastQueue(  496): Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+W/BroadcastQueue(  496): Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+W/BroadcastQueue(  496): Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.bubblesaro.bob flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+I/ActivityTaskManager(  496): START u0 {act=android.intent.action.ASSIST flg=0x10000000 cmp=com.bubblesaro.bob/.MainActivity} from uid 2000
